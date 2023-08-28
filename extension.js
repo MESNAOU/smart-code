@@ -38,7 +38,10 @@ function activate(context) {
 // This method is called when your extension is deactivated
 function deactivate() {}
 
-
+/**
+ * createNewEditor - displaying a content in a new editor
+ * @content: displayed content
+ */
 async function createNewEditor(content) {
 	// Create a new untitled document
 	const newDocument = await vscode.workspace.openTextDocument({ content: `${content}` });
@@ -50,22 +53,28 @@ async function createNewEditor(content) {
 	await newDocument.save();
 }
 
+/**
+ * describ - comment the offered description and add the corresponding code 
+ * @ed: current editor
+ */
 function describ(ed){
 	if (ed) {
-
+		//the offered description
 		let txt = ed.document.getText();
+		//to store the responce
 		let resp;
 
 		if(txt != ""){
-
 			const OpenAI = require("openai");
-			
+
+			//ask for a key
 			vscode.window.showInputBox({
 				prompt: "Enter your chat GPT API key",
 				placeHolder: "sk-**********************"
 			}).then(async (key) =>{
 				if (key) {
 					try {
+						//create connexion with chat GPT
 						const openai = new OpenAI({
 							apiKey: `${key}`
 						});
@@ -78,17 +87,21 @@ function describ(ed){
 						});
 						resp = completion.choices[0];
 
+						//display the responce
 						ed.edit(editBuilder => {
-							// Define the range where you want to make changes
+							//get the start of the editor
 							const rg1 = new vscode.Range(0, 0, 0, 0);
+							//get the end of the description
 							let rg2 = new vscode.Range(ed.document.lineCount , 0, ed.document.lineCount , 0);
-							// Replace the selected range with new text
-				
+
+							// start a comment
 							editBuilder.replace(rg2, `\n*/\n${resp}\n`);
+							//add the code
 							editBuilder.replace(rg1, '/*\n');
 						});
 
 					} catch (error) {
+						//incorrect key
 						vscode.window.showErrorMessage('Your API key is incorrect or expired.Please retry.');
 						return describ(ed);
 					}
@@ -102,165 +115,216 @@ function describ(ed){
 	}
 }
 
+/**
+ * refac - refactor the offred code 
+ * @ed: current editor
+ */
 function refac(ed) {
 
 	if (ed) {
+		//get the offered code
 		let txt = ed.document.getText();
+		//to store the responce
 		let resp;
-		const OpenAI = require("openai");
+
+		if(txt != ""){
+			const OpenAI = require("openai");
 			
-		vscode.window.showInputBox({
-			prompt: "Enter your chat GPT API key",
-			placeHolder: "sk-**********************"
-		}).then(async (key) =>{
-			if (key) {
-				try {
-					const openai = new OpenAI({
-						apiKey: `${key}`
-					});
-					const completion = await openai.chat.completions.create({
-						messages: [
-							{ role: "user", content: "refactorer ce code" },
-							{ role: "user", content: txt }
-						],
-						model: "gpt-3.5-turbo",
-					});
-					resp = completion.choices[0];
-					ed.edit(editBuilder => {
-						// Define the range where you want to make changes
-						let rg = new vscode.Range(0, 0, ed.document.lineCount, 0);
-						// Replace the selected range with new text
-						editBuilder.replace(rg, `${resp}`);
-					});
-				} catch (error) {
-					vscode.window.showErrorMessage('Your API key is incorrect or expired.Please retry.');
-					return refac(ed);
+			//ask for a key
+			vscode.window.showInputBox({
+				prompt: "Enter your chat GPT API key",
+				placeHolder: "sk-**********************"
+			}).then(async (key) =>{
+				if (key) {
+					try {
+						//create connexion with chat GPT
+						const openai = new OpenAI({
+							apiKey: `${key}`
+						});
+						const completion = await openai.chat.completions.create({
+							messages: [
+								{ role: "user", content: "refactorer ce code" },
+								{ role: "user", content: txt }
+							],
+							model: "gpt-3.5-turbo",
+						});
+						resp = completion.choices[0];
+						
+						//display the responce
+						ed.edit(editBuilder => {
+							// get the editor
+							let rg = new vscode.Range(0, 0, ed.document.lineCount, 0);
+				
+							// overwrite the code with the responce
+							editBuilder.replace(rg, `${resp}`);
+						});
+					} catch (error) {
+						vscode.window.showErrorMessage('Your API key is incorrect or expired.Please retry.');
+						return refac(ed);
+					}
+				} else {
+					// User canceled the input
+					vscode.window.showWarningMessage("The extension is canceled.");
 				}
-			} else {
-				// User canceled the input
-				vscode.window.showWarningMessage("The extension is canceled.");
-			}
-		})
+			})
+		}
 	}
 }
+
+/**
+ * bug - debug the offred code 
+ * @ed: current editor
+ */
 function bug(ed){
-
 	if (ed) {
 		let txt = ed.document.getText();
+		//to store the responce
 		let resp;
-		const OpenAI = require("openai");
+
+		if(txt != ""){
+			const OpenAI = require("openai");
 			
-		vscode.window.showInputBox({
-			prompt: "Enter your chat GPT API key",
-			placeHolder: "sk-**********************"
-		}).then(async (key) =>{
-			if (key) {
-				try {
-					const openai = new OpenAI({
-						apiKey: `${key}`
-					});
-					const completion = await openai.chat.completions.create({
-						messages: [
-							{ role: "user", content: "fixer les bugs existants dans ce code" },
-							{ role: "user", content: txt }
-						],
-						model: "gpt-3.5-turbo",
-					});
-					resp = completion.choices[0];
-					ed.edit(editBuilder => {
-						// Define the range where you want to make changes
-						let rg = new vscode.Range(0, 0, ed.document.lineCount, 0);
-						// Replace the selected range with new text
-						editBuilder.replace(rg, `${resp}`);
-					});
-				} catch (error) {
-					vscode.window.showErrorMessage('Your API key is incorrect or expired.Please retry.');
-					return bug(ed);
+			//ask for a key
+			vscode.window.showInputBox({
+				prompt: "Enter your chat GPT API key",
+				placeHolder: "sk-**********************"
+			}).then(async (key) =>{
+				if (key) {
+					try {
+						//create connexion with chat GPT
+						const openai = new OpenAI({
+							apiKey: `${key}`
+						});
+						const completion = await openai.chat.completions.create({
+							messages: [
+								{ role: "user", content: "fixer les bugs existants dans ce code" },
+								{ role: "user", content: txt }
+							],
+							model: "gpt-3.5-turbo",
+						});
+						resp = completion.choices[0];
+						
+						//display the responce
+						ed.edit(editBuilder => {
+							// get the editor
+							let rg = new vscode.Range(0, 0, ed.document.lineCount, 0);
+
+							// overwrite the code with the responce
+							editBuilder.replace(rg, `${resp}`);
+						});
+					} catch (error) {
+						vscode.window.showErrorMessage('Your API key is incorrect or expired.Please retry.');
+						return bug(ed);
+					}
+				} else {
+					// User canceled the input
+					vscode.window.showWarningMessage("The extension is canceled.");
 				}
-			} else {
-				// User canceled the input
-				vscode.window.showWarningMessage("The extension is canceled.");
-			}
-		})
+			})
+		}
 	}
 }
 
+/**
+ * test - generate unit tests in a new editor
+ * @ed: current editor
+ */
 function test(ed) {
-
 	if (ed) {
 		let txt = ed.document.getText();
+		//to store the responce
 		let resp;
-		const OpenAI = require("openai");
+
+		if(txt != ""){
+			const OpenAI = require("openai");
 			
-		vscode.window.showInputBox({
-			prompt: "Enter your chat GPT API key",
-			placeHolder: "sk-**********************"
-		}).then(async (key) =>{
-			if (key) {
-				try {
-					const openai = new OpenAI({
-						apiKey: `${key}`
-					});
-					const completion = await openai.chat.completions.create({
-						messages: [
-							{ role: "user", content: "générer des tests unitaires pour ce code" },
-							{ role: "user", content: txt }
-						],
-						model: "gpt-3.5-turbo",
-					});
-					resp = completion.choices[0];
-					createNewEditor(resp);
-				} catch (error) {
-					vscode.window.showErrorMessage('Your API key is incorrect or expired.Please retry.');
-					return test(ed);
+			//ask for a key
+			vscode.window.showInputBox({
+				prompt: "Enter your chat GPT API key",
+				placeHolder: "sk-**********************"
+			}).then(async (key) =>{
+				if (key) {
+					try {
+						//create connexion with chat GPT
+						const openai = new OpenAI({
+							apiKey: `${key}`
+						});
+						const completion = await openai.chat.completions.create({
+							messages: [
+								{ role: "user", content: "générer des tests unitaires pour ce code" },
+								{ role: "user", content: txt }
+							],
+							model: "gpt-3.5-turbo",
+						});
+						resp = completion.choices[0];
+						
+						//display the responce in a new editor
+						createNewEditor(resp);
+					} catch (error) {
+						vscode.window.showErrorMessage('Your API key is incorrect or expired.Please retry.');
+						return test(ed);
+					}
+				} else {
+					// User canceled the input
+					vscode.window.showWarningMessage("The extension is canceled.");
 				}
-			} else {
-				// User canceled the input
-				vscode.window.showWarningMessage("The extension is canceled.");
-			}
-		})
+			})
+		}
 	}
 }
 
+/**
+ * bug - comment the offred code 
+ * @ed: current editor
+ */
 function comment(ed) {
 
 	if (ed) {
 		let txt = ed.document.getText();
+		//to store the responce
 		let resp;
-		const OpenAI = require("openai");
+
+		if(txt != ""){
+			const OpenAI = require("openai");
 			
-		vscode.window.showInputBox({
-			prompt: "Enter your chat GPT API key",
-			placeHolder: "sk-**********************"
-		}).then(async (key) =>{
-			if (key) {
-				try {
-					const openai = new OpenAI({
-						apiKey: `${key}`
-					});
-					const completion = await openai.chat.completions.create({
-						messages: [
-							{ role: "user", content: "commenter ce code" },
-							{ role: "user", content: txt }
-						],
-						model: "gpt-3.5-turbo",
-					});
-					resp = completion.choices[0];
-					ed.edit(editBuilder => {
-						// Define the range where you want to make changes
-						let rg = new vscode.Range(0, 0, ed.document.lineCount, 0);
-						// Replace the selected range with new text
-						editBuilder.replace(rg, `${resp}`);
-					});
-				} catch (error) {
-					vscode.window.showErrorMessage('Your API key is incorrect or expired.Please retry.');
-					return comment(ed);
+			//ask for a key
+			vscode.window.showInputBox({
+				prompt: "Enter your chat GPT API key",
+				placeHolder: "sk-**********************"
+			}).then(async (key) =>{
+				if (key) {
+					try {
+						//create connexion with chat GPT
+						const openai = new OpenAI({
+							apiKey: `${key}`
+						});
+						const completion = await openai.chat.completions.create({
+							messages: [
+								{ role: "user", content: "commenter ce code" },
+								{ role: "user", content: txt }
+							],
+							model: "gpt-3.5-turbo",
+						});
+						resp = completion.choices[0];
+						
+						//display the responce
+						ed.edit(editBuilder => {
+							// get the editor
+							let rg = new vscode.Range(0, 0, ed.document.lineCount, 0);
+							
+							// overwrite the code with the responce
+							editBuilder.replace(rg, `${resp}`);
+						});
+					} catch (error) {
+						vscode.window.showErrorMessage('Your API key is incorrect or expired.Please retry.');
+						return comment(ed);
+					}
+				} else {
+					// User canceled the input
+					vscode.window.showWarningMessage("The extension is canceled.");
 				}
-			} else {
-				// User canceled the input
-				vscode.window.showWarningMessage("The extension is canceled.");
-			}
-		})
+			})
+		}
 	}
 }
 
