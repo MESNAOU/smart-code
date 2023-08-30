@@ -80,12 +80,21 @@ function describ(ed){
 						});
 						const completion = await openai.chat.completions.create({
 							messages: [
-								{ role: "user", content: "générer du code à base de cette description textuelle" },
-								{ role: "user", content: txt }
+								{ role: "user", content: "Please provide me with code to" },
+								{ role: "user", content: txt },
+								{
+									role: "user",
+									content: `answer me in the following parsable json format:
+									{
+										"D": explanation,
+										"C": code
+									}
+									`
+								}
 							],
 							model: "gpt-3.5-turbo",
 						});
-						resp = completion.choices[0];
+						resp = JSON.parse(completion.choices[0].message.content).C;
 
 						//display the responce
 						ed.edit(editBuilder => {
@@ -143,12 +152,21 @@ function refac(ed) {
 						});
 						const completion = await openai.chat.completions.create({
 							messages: [
-								{ role: "user", content: "refactorer ce code" },
-								{ role: "user", content: txt }
+								{ role: "user", content: "Please provide me with code to refactor this code:" },
+								{ role: "user", content: txt },
+								{
+									role: "user",
+									content: `answer me in the following parsable json format:
+									{
+										"D": explanation,
+										"C": code
+									}
+									`
+								}
 							],
 							model: "gpt-3.5-turbo",
 						});
-						resp = completion.choices[0];
+						resp = JSON.parse(completion.choices[0].message.content).C;
 						
 						//display the responce
 						ed.edit(editBuilder => {
@@ -197,12 +215,21 @@ function bug(ed){
 						});
 						const completion = await openai.chat.completions.create({
 							messages: [
-								{ role: "user", content: "fixer les bugs existants dans ce code" },
-								{ role: "user", content: txt }
+								{ role: "user", content: "Please provide me with code to fix existing bugs in this code:" },
+								{ role: "user", content: txt },
+								{
+									role: "user",
+									content: `answer me in the following parsable json format:
+									{
+										"D": explanation,
+										"C": code
+									}
+									`
+								}
 							],
 							model: "gpt-3.5-turbo",
 						});
-						resp = completion.choices[0];
+						resp = JSON.parse(completion.choices[0].message.content).C;
 						
 						//display the responce
 						ed.edit(editBuilder => {
@@ -251,7 +278,7 @@ function test(ed) {
 						});
 						const completion = await openai.chat.completions.create({
 							messages: [
-								{ role: "user", content: "générer des tests unitaires pour ce code" },
+								{ role: "user", content: "generate unit tests for this code:" },
 								{ role: "user", content: txt }
 							],
 							model: "gpt-3.5-turbo",
@@ -300,12 +327,21 @@ function comment(ed) {
 						});
 						const completion = await openai.chat.completions.create({
 							messages: [
-								{ role: "user", content: "commenter ce code" },
-								{ role: "user", content: txt }
+								{ role: "user", content: "comment this code:" },
+								{ role: "user", content: txt },
+								{
+									role: "user",
+									content: `answer me in the following parsable json format:
+									{
+										"D": explanation,
+										"C": code
+									}
+									`
+								}
 							],
 							model: "gpt-3.5-turbo",
 						});
-						resp = completion.choices[0];
+						resp = JSON.parse(completion.choices[0].message.content).C;
 						
 						//display the responce
 						ed.edit(editBuilder => {
