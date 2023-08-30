@@ -283,7 +283,7 @@ function test(ed) {
 							],
 							model: "gpt-3.5-turbo",
 						});
-						resp = completion.choices[0];
+						resp = completion.choices[0].message.content;
 						
 						//display the responce in a new editor
 						createNewEditor(resp);
@@ -334,7 +334,7 @@ function comment(ed) {
 									content: `answer me in the following parsable json format:
 									{
 										"D": explanation,
-										"C": code
+										"C": code with comments in it
 									}
 									`
 								}
