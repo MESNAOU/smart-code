@@ -84,7 +84,7 @@ function describ(ed){
 								{ role: "user", content: txt },
 								{
 									role: "user",
-									content: `answer me in the following parsable json format:
+									content: `answer me exactly in the following parsable json format:
 									{
 										"D": explanation,
 										"C": code
@@ -94,6 +94,7 @@ function describ(ed){
 							],
 							model: "gpt-3.5-turbo",
 						});
+						
 						resp = JSON.parse(completion.choices[0].message.content).C;
 
 						//display the responce
@@ -156,7 +157,7 @@ function refac(ed) {
 								{ role: "user", content: txt },
 								{
 									role: "user",
-									content: `answer me in the following parsable json format:
+									content: `answer me exactly in the following parsable json format:
 									{
 										"D": explanation,
 										"C": code
@@ -219,7 +220,7 @@ function bug(ed){
 								{ role: "user", content: txt },
 								{
 									role: "user",
-									content: `answer me in the following parsable json format:
+									content: `answer me exactly in the following parsable json format:
 									{
 										"D": explanation,
 										"C": code
@@ -331,7 +332,7 @@ function comment(ed) {
 								{ role: "user", content: txt },
 								{
 									role: "user",
-									content: `answer me in the following parsable json format:
+									content: `answer me exactly in the following parsable json format:
 									{
 										"D": explanation,
 										"C": code with comments in it
@@ -341,6 +342,7 @@ function comment(ed) {
 							],
 							model: "gpt-3.5-turbo",
 						});
+						
 						resp = JSON.parse(completion.choices[0].message.content).C;
 						
 						//display the responce
