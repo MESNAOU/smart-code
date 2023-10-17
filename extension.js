@@ -63,6 +63,7 @@ function describ(ed){
 		let txt = ed.document.getText();
 		//to store the responce
 		let resp;
+		let lang;
 
 		if(txt != ""){
 			const OpenAI = require("openai");
@@ -78,38 +79,81 @@ function describ(ed){
 						const openai = new OpenAI({
 							apiKey: `${key}`
 						});
-						const completion = await openai.chat.completions.create({
-							messages: [
-								{ role: "user", content: "Please provide me with code to" },
-								{ role: "user", content: txt },
-								{
-									role: "user",
-									content: `answer me exactly in the following parsable json format:
+						//ask for the desired code's language
+						vscode.window.showInputBox({
+							prompt: "which language do you want to write your code?",
+							placeHolder: "******"
+						}).then(async (language) =>{
+							if(language){
+								lang = language.toLowerCase();
+							}
+
+							const completion = await openai.chat.completions.create({
+								messages: [
+									{ role: "user", content: `Please provide me with code writing in ${lang} to` },
+									{ role: "user", content: txt },
 									{
-										"D": explanation,
-										"C": code
+										role: "user",
+										content: `answer me exactly in the following parsable json format:
+										{
+											"D": "explanation",
+											"C": "code with line breaker"
+										}
+										`
 									}
-									`
+								],
+								model: "gpt-3.5-turbo",
+							});
+							resp = JSON.parse(completion.choices[0].message.content).C;
+	
+							//display the responce
+							ed.edit(editBuilder => {
+								//place to open the comment 
+								let symst;
+								//place to end comment
+								let symend;
+	
+								//choose the comment's symboles according to the language
+								if(lang == "html"){
+									symst = "<!--";
+									symend="-->"
+								}else if(lang == "python"){
+									symst = "'''";
+									symend = "'''"
+								}else{
+									symst="/*";
+									symend="*/"
 								}
-							],
-							model: "gpt-3.5-turbo",
-						});
+	
+								//comment each lign for "R" and shell
+								if(lang == "r" || lang == "shell"){
+									//get first line
+									let i = 0;
+									let rg = new vscode.Range(i, 0, i, 0);
+	
+									//iterate for each line
+									while(i<ed.document.lineCount){
+										editBuilder.replace(rg, '#');
+										i++;
+										rg = new vscode.Range(i, 0, i, 0);
+									}
+	
+									//add the code
+									editBuilder.replace(rg, `\n${resp}\n`);
+								}else{
+									//get the start of the editor
+									const rg1 = new vscode.Range(0, 0, 0, 0);
+									//get the end of the description
+									let rg2 = new vscode.Range(ed.document.lineCount , 0, ed.document.lineCount , 0);
+	
+									// start a comment
+									editBuilder.replace(rg2, `\n${symend}\n${resp}\n`);
+									//add the code
+									editBuilder.replace(rg1, `${symst}\n`);
+								}
+							});
+						})
 						
-						resp = JSON.parse(completion.choices[0].message.content).C;
-
-						//display the responce
-						ed.edit(editBuilder => {
-							//get the start of the editor
-							const rg1 = new vscode.Range(0, 0, 0, 0);
-							//get the end of the description
-							let rg2 = new vscode.Range(ed.document.lineCount , 0, ed.document.lineCount , 0);
-
-							// start a comment
-							editBuilder.replace(rg2, `\n*/\n${resp}\n`);
-							//add the code
-							editBuilder.replace(rg1, '/*\n');
-						});
-
 					} catch (error) {
 						//incorrect key
 						vscode.window.showErrorMessage('Your API key is incorrect or expired.Please retry.');
